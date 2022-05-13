@@ -1,0 +1,28 @@
+# depslib dependency file v1.0
+1652393565 source:c:\users\maciej\desktop\pgm viewer\pgmviewer.cpp
+	"glew.c"
+	<GL/glew.h>
+	<GL/glu.h>
+	<GLFW/glfw3.h>
+	<fstream>
+	<string>
+	<iostream>
+
+1501503939 c:\users\maciej\desktop\pgm viewer\glew.c
+	<GL/glew.h>
+	<GL/osmesa.h>
+	<GL/eglew.h>
+	<GL/wglew.h>
+	<GL/glxew.h>
+	<stddef.h>
+	<dlfcn.h>
+	<stdio.h>
+	<stdlib.h>
+	<stdlib.h>
+	<string.h>
+	<AvailabilityMacros.h>
+	<dlfcn.h>
+	<mach-o/dyld.h>
+
+1652383016 source:c:\users\maciej\desktop\pgm viewer\resource.rc
+
