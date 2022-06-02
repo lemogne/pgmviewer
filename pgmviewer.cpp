@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
 		file.read((char *)imgunion.image_chars, sizeof(short) * size_y * rowlength);
 		if (max_size != 65535)
 			for (int i = 0; i < size_y; i++)
-				for (int j = 0; j < rowlength * channels; j++) {
+				for (int j = 0; j < rowlength; j++) {
 					imgunion.image[i * rowlength + j] = (unsigned short)(((int)imgunion.image[i * rowlength + j] * 65535) / max_size);
 				}
 		image = imgunion.image_chars;
@@ -96,6 +96,12 @@ int main(int argc, char **argv) {
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+	glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size_x, size_y, 0, type, datatype, image);
 
 	draw(window);
