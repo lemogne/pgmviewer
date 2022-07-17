@@ -5,11 +5,15 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <unistd.h>
 
 int get(std::ifstream &input);
 void window_size_callback(GLFWwindow *window, int width, int height);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void draw(GLFWwindow *window);
 std::string getFileName(std::string filePath, char seperator = '\\');
+int resize_mode = 0;	// Resize Mode: 0 - Keep proportions; 1 - Fill window
+double image_aspect_ratio;	// Height / Width
 
 int main(int argc, char **argv) {
 	GLFWwindow *window;
@@ -45,6 +49,7 @@ int main(int argc, char **argv) {
 
 	size_x = get(file);
 	size_y = get(file);
+	image_aspect_ratio = (double) size_y / (double) size_x;
 	max_size = get(file);
 	file.get();
 	int rowlength = size_x * channels;
@@ -80,6 +85,7 @@ int main(int argc, char **argv) {
 	window = glfwCreateWindow(size_x, size_y, (getFileName(argv[1], '\\') + " - PGM, PPM Viewer").c_str(), NULL, NULL);
 	glfwMakeContextCurrent(window);
 	glfwSetWindowSizeCallback(window, window_size_callback);
+	glfwSetKeyCallback(window, key_callback);
 	if (argc == 1)
 		return EXIT_FAILURE;
 	int width, height;
@@ -107,6 +113,7 @@ int main(int argc, char **argv) {
 	draw(window);
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
+		usleep(40000);
 	}
 	return 0;
 }
@@ -141,20 +148,38 @@ void window_size_callback(GLFWwindow *window, int width, int height) {
 	draw(window);
 }
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (key == GLFW_KEY_G && action == GLFW_PRESS){
+		resize_mode ^= 1;	// Flip value
+		draw(window);
+	}
+}
+
 void draw(GLFWwindow *window) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	double x_offset = 1.0;
+	double y_offset = 1.0;
 	glBegin(GL_QUADS);
+	if (!resize_mode) {
+		int width, height;
+		glfwGetWindowSize(window, &width, &height);
+		double size_ratio = (double) height / (double) width;
+		if (size_ratio > image_aspect_ratio)
+			y_offset = image_aspect_ratio/size_ratio;
+		else
+			x_offset = size_ratio/image_aspect_ratio;
+	}
 	glTexCoord2d(0.0, 0.0);
-	glVertex2d(-1.0, 1.0);
+	glVertex2d(-x_offset, y_offset);
 
 	glTexCoord2d(0.0, 1.0);
-	glVertex2d(-1.0, -1.0);
+	glVertex2d(-x_offset, -y_offset);
 
 	glTexCoord2d(1.0, 1.0);
-	glVertex2d(1.0, -1.0);
+	glVertex2d(x_offset, -y_offset);
 
 	glTexCoord2d(1.0, 0.0);
-	glVertex2d(1.0, 1.0);
+	glVertex2d(x_offset, y_offset);
 	glEnd();
 	glfwSwapBuffers(window);
 }
