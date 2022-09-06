@@ -12,3 +12,5 @@ We here at lemogne Incorporated didn't either, but since no alternatives existed
 \**(probably not, but you can't disprove it either :^) )*
 
 \*\**(other than the existing alternatives)*
+
+Now you may ask, *'But lemon, how can you write such atrocious code? On your GitHub?'*. And the answer is the following: this was cobbled together in one afternoon in order to have something functional so I could do my university assignments. Also, I have a soft spot for Dennis Ritchie's fork of a simplified BCPL, which should be apparent in the code.
