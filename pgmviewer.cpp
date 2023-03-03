@@ -88,29 +88,21 @@ int main(int argc, char **argv) {
 		datatype = GL_UNSIGNED_SHORT;
 	}
 	file.close();
-	std::cout<<"f";
 	window = glfwCreateWindow(size_x, size_y, (getFileName(argv[1], '\\') + " - PGM, PPM Viewer").c_str(), NULL, NULL);
-	std::cout<<"a";
 	glfwMakeContextCurrent(window);
-	std::cout<<"b";
 	glfwSetWindowSizeCallback(window, window_size_callback);
-	std::cout<<"c";
 	glfwSetKeyCallback(window, key_callback);
-	std::cout<<"d";
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
-	std::cout<<"e";
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
 	glViewport(0, 0, width, height);
-	std::cout<<"f";
 	if (!window) {
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
-	std::cout<<"g";
 	GLuint imgBuffer;
 	glGenTextures(1, &imgBuffer);
 	glBindTexture(GL_TEXTURE_2D, imgBuffer);
