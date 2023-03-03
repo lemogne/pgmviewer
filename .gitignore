@@ -1,2 +1,9 @@
 build
+bin
+obj
 .vscode
+*.o
+*.cbp
+*.depend
+*.layout
+*.res
