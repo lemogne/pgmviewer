@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 		if (max_size != 65535)
 			for (int i = 0; i < size_y; i++)
 				for (int j = 0; j < rowlength * channels; j++) {
-					image[i * rowlength + j] = (unsigned char)(((int)image[i * rowlength + j] * 65535) / max_size);
+					imgunion.image[i * rowlength + j] = (unsigned short)(((int)imgunion.image[i * rowlength + j] * 65535) / max_size);
 				}
 		image = imgunion.image_chars;
 		datatype = GL_UNSIGNED_SHORT;
