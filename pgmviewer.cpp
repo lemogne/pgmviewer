@@ -1,11 +1,17 @@
-#include <GL/glew.c>
-#include <GL/glew.h>
-#include <GL/glu.h>
+#define GLEW_STATIC
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <fstream>
 #include <string>
 #include <iostream>
 #include <unistd.h>
+#ifdef __unix__   
+#include <libgen.h>
+#include <linux/limits.h>
+#include <unistd.h>
+#elif defined(_WIN32) || defined(WIN32)
+#include <windows.h>
+#endif
 
 int get(std::ifstream &input);
 void window_size_callback(GLFWwindow *window, int width, int height);
@@ -17,6 +23,7 @@ double image_aspect_ratio;	// Height / Width
 
 int main(int argc, char **argv) {
 	GLFWwindow *window;
+
 	if (!glfwInit()) {
 		glfwTerminate();
 		return EXIT_FAILURE;
@@ -81,20 +88,29 @@ int main(int argc, char **argv) {
 		datatype = GL_UNSIGNED_SHORT;
 	}
 	file.close();
-
+	std::cout<<"f";
 	window = glfwCreateWindow(size_x, size_y, (getFileName(argv[1], '\\') + " - PGM, PPM Viewer").c_str(), NULL, NULL);
+	std::cout<<"a";
 	glfwMakeContextCurrent(window);
+	std::cout<<"b";
 	glfwSetWindowSizeCallback(window, window_size_callback);
+	std::cout<<"c";
 	glfwSetKeyCallback(window, key_callback);
-	if (argc == 1)
-		return EXIT_FAILURE;
+	std::cout<<"d";
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
+	std::cout<<"e";
+	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+		std::cout << "Failed to initialize GLAD" << std::endl;
+		return -1;
+	}
 	glViewport(0, 0, width, height);
+	std::cout<<"f";
 	if (!window) {
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
+	std::cout<<"g";
 	GLuint imgBuffer;
 	glGenTextures(1, &imgBuffer);
 	glBindTexture(GL_TEXTURE_2D, imgBuffer);
@@ -111,6 +127,7 @@ int main(int argc, char **argv) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size_x, size_y, 0, type, datatype, image);
 
 	draw(window);
+
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		usleep(40000);
