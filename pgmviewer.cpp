@@ -17,7 +17,7 @@ int get(std::ifstream &input);
 void window_size_callback(GLFWwindow *window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void draw(GLFWwindow *window);
-std::string getFileName(std::string filePath, char seperator = '\\');
+std::string get_filename(std::string filePath, char seperator = '\\');
 int resize_mode = 0;	// Resize Mode: 0 - Keep proportions; 1 - Fill window
 double image_aspect_ratio;	// Height / Width
 
@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
 	GLFWwindow *window;
 
 	if (!glfwInit()) {
+		std::cerr << "Could not initialise GLFW!\n";
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
@@ -32,6 +33,7 @@ int main(int argc, char **argv) {
 	std::ifstream file;
 	file.open(argv[1], std::ios::in | std::ios::binary);
 	if (!file) {
+		std::cerr << "No such file!\n";
 		return EXIT_FAILURE;
 	}
 
@@ -44,6 +46,7 @@ int main(int argc, char **argv) {
 	int channels;
 	GLenum type;
 
+	// Determine file type
 	file >> line;
 	if (line == "P5") {
 		channels = 1;
@@ -51,9 +54,12 @@ int main(int argc, char **argv) {
 	} else if (line == "P6") {
 		channels = 3;
 		type = GL_RGB;
-	} else
+	} else {
+		std::cerr << "Not a supported file type!\n";
 		return EXIT_FAILURE;
+	}
 
+	// Determine aspect ratio
 	size_x = get(file);
 	size_y = get(file);
 	image_aspect_ratio = (double) size_y / (double) size_x;
@@ -61,23 +67,26 @@ int main(int argc, char **argv) {
 	file.get();
 	int rowlength = size_x * channels;
 
+	// Read file
 	if (max_size < 256) {
-		image = (unsigned char *)malloc(size_y * rowlength);
+		image = new unsigned char[size_y * rowlength];
 		file.read((char *)image, size_y * rowlength);
 
 		if (max_size != 255)
 			for (int i = 0; i < size_y; i++)
 				for (int j = 0; j < rowlength; j++) {
+					// For images with lower dynamic range, increase to 1 byte per channel
 					image[i * rowlength + j] = (unsigned char)(((int)image[i * rowlength + j] * 255) / max_size);
 				}
 		datatype = GL_UNSIGNED_BYTE;
 	} else {
+		// Not the cleanest sulution (UB!) but it works
 		union {
 			unsigned short *image;
 			unsigned char *image_chars;
 		} imgunion;
 
-		imgunion.image = (unsigned short *)malloc(sizeof(short) * size_y * rowlength);
+		imgunion.image = new unsigned short[size_y * rowlength];
 		file.read((char *)imgunion.image_chars, sizeof(short) * size_y * rowlength);
 		if (max_size != 65535)
 			for (int i = 0; i < size_y; i++)
@@ -88,10 +97,13 @@ int main(int argc, char **argv) {
 		datatype = GL_UNSIGNED_SHORT;
 	}
 	file.close();
-	window = glfwCreateWindow(size_x, size_y, (getFileName(argv[1], '\\') + " - PGM, PPM Viewer").c_str(), NULL, NULL);
+
+	// Init glfw
+	window = glfwCreateWindow(size_x, size_y, (get_filename(argv[1], '\\') + " - PGM, PPM Viewer").c_str(), NULL, NULL);
 	glfwMakeContextCurrent(window);
 	glfwSetWindowSizeCallback(window, window_size_callback);
 	glfwSetKeyCallback(window, key_callback);
+
 	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
 	if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
@@ -103,6 +115,8 @@ int main(int argc, char **argv) {
 		glfwTerminate();
 		return EXIT_FAILURE;
 	}
+
+	// Init OpenGL
 	GLuint imgBuffer;
 	glGenTextures(1, &imgBuffer);
 	glBindTexture(GL_TEXTURE_2D, imgBuffer);
@@ -124,6 +138,8 @@ int main(int argc, char **argv) {
 		glfwPollEvents();
 		usleep(40000);
 	}
+	delete image;
+
 	return 0;
 }
 
@@ -142,12 +158,12 @@ int get(std::ifstream &input) {
 	return std::stoi(line);
 }
 
-std::string getFileName(std::string filePath, char seperator) {
-	size_t dotPos = filePath.rfind('.');
-	size_t sepPos = filePath.rfind(seperator);
-	if (sepPos != std::string::npos)
-		return filePath.substr(sepPos + 1, filePath.size() - (dotPos != std::string::npos ? 1 : dotPos));
-	return filePath;
+std::string get_filename(std::string file_path, char seperator) {
+	size_t dot_pos = file_path.rfind('.');
+	size_t sep_pos = file_path.rfind(seperator);
+	if (sep_pos != std::string::npos)
+		return file_path.substr(sep_pos + 1, file_path.size() - (dot_pos != std::string::npos ? 1 : dot_pos));
+	return file_path;
 }
 
 void window_size_callback(GLFWwindow *window, int width, int height) {
@@ -159,7 +175,7 @@ void window_size_callback(GLFWwindow *window, int width, int height) {
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (key == GLFW_KEY_G && action == GLFW_PRESS){
-		resize_mode ^= 1;	// Flip value
+		resize_mode ^= true;	// Flip value
 		draw(window);
 	}
 }
